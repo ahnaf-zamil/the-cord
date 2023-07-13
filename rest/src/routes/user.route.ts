@@ -40,4 +40,32 @@ router.post("/register", validate(RegisterValidation), async (req, res) => {
   res.json(201);
 });
 
+const LoginValidation = {
+  body: Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  }),
+};
+
+// Log into account
+router.post("/login", validate(LoginValidation), async (req, res) => {
+  const email: string = req.body.email.toLowerCase();
+  const password: string = req.body.password;
+
+  // Checking for existing account
+  const existingUser = await db.user.findOne({ where: { email } });
+  if (existingUser == null) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+
+  // Check pw hash
+  if ((await bcrypt.compare(password, existingUser.password)) == false) {
+    return res.status(401).json({ error: "Invalid credentials" });
+  }
+
+  // Setting session
+  req.session.userId = existingUser.id;
+  res.json(201);
+});
+
 export default router;
