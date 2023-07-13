@@ -1,0 +1,5 @@
+omega/
+dist/
+node_modules/
+test.html
+*.log
