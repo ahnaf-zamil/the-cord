@@ -1,5 +1,5 @@
 import natsConfig from "../config/nats.config";
-import { connect, StringCodec, NatsConnection } from "nats";
+import { connect, NatsConnection } from "nats";
 
 let natsClient: NatsConnection | null;
 

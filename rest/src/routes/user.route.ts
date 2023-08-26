@@ -1,8 +1,10 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { validate, ValidationError, Joi } from "express-validation";
+import { validate, Joi } from "express-validation";
 import db from "../lib/db";
 import snowflake from "../lib/snowflake";
+import { authRequired } from "../middleware/auth";
+import { UserModel } from "../models/user.model";
 
 const router = express.Router();
 
@@ -23,13 +25,13 @@ router.post("/register", validate(RegisterValidation), async (req, res) => {
   const password: string = req.body.password;
 
   // Checking for existing account
-  if ((await db.user.findOne({ where: { email } })) !== null) {
+  if ((await db.models.user.findOne({ where: { email } })) !== null) {
     return res.status(409).json({ error: "User exists" });
   }
 
   const hashedPw = await bcrypt.hash(password, 10);
   console.log(hashedPw);
-  await db.user.create({
+  await db.models.user.create({
     id: snowflake.generate(),
     handle,
     username,
@@ -53,7 +55,9 @@ router.post("/login", validate(LoginValidation), async (req, res) => {
   const password: string = req.body.password;
 
   // Checking for existing account
-  const existingUser = await db.user.findOne({ where: { email } });
+  const existingUser: UserModel = await db.models.user.findOne({
+    where: { email },
+  });
   if (existingUser == null) {
     return res.status(401).json({ error: "Invalid credentials" });
   }
@@ -64,8 +68,13 @@ router.post("/login", validate(LoginValidation), async (req, res) => {
   }
 
   // Setting session
-  req.session.userId = existingUser.id;
+  req.session.userId = existingUser.id.toString();
   res.json(201);
+});
+
+// Get logged in user
+router.get("/@me", authRequired, async (req, res) => {
+  res.status(201).json(req.user?.toJSON());
 });
 
 export default router;

@@ -1,14 +1,16 @@
-import { Model, ModelCtor, ModelDefined, Sequelize } from "sequelize";
+import { ModelStatic, Sequelize, Model } from "sequelize";
 import guildModel from "../models/guild.model";
 
 import dbConf from "../config/db.config";
 import userModel from "../models/user.model";
-import { Literal } from "sequelize/types/utils";
+
+interface IModels {
+  [x: string]: ModelStatic<any>;
+}
 
 interface IDB {
   sequelize: Sequelize;
-
-  [x: string]: any;
+  models: IModels;
 }
 
 const db: IDB = {
@@ -17,9 +19,10 @@ const db: IDB = {
     dialect: "postgres",
     pool: dbConf.pool,
   }),
+  models: {},
 };
 
-db.guild = guildModel(db.sequelize);
-db.user = userModel(db.sequelize);
+db.models.guild = guildModel(db.sequelize);
+db.models.user = userModel(db.sequelize);
 
 export default db;
