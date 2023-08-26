@@ -1,7 +1,8 @@
 import { Server } from "socket.io";
-import { createClient } from "redis";
 import { createServer } from "http";
 import { handleDispatchedMessage } from "./dispatch_handler";
+import { connect, StringCodec } from "nats";
+import natsConfig from "./config/nats.config";
 
 const PORT = 3000;
 
@@ -22,16 +23,16 @@ io.on("disconnect", (socket) => {
   console.log("Socket has disconnected: " + socket.id);
 });
 
-const pubClient = createClient({ url: "redis://localhost:6379" });
-const subClient = pubClient.duplicate();
-
 httpServer.listen(PORT, async () => {
   console.log(`Listening on port ${PORT}`);
 
-  await subClient.connect();
-  console.log("Connected to Redis");
-  await subClient.subscribe("_", (msg) => {
-    // Handle dispatched messages from Redis
-    handleDispatchedMessage(io, JSON.parse(msg));
-  });
+  // Creating NATS subscriber and listening for messages
+  const nc = await connect({ servers: natsConfig.SERVERS });
+  const sc = StringCodec();
+
+  const sub = nc.subscribe("_");
+  for await (const msg of sub) {
+    // Passing message to dispatch handler
+    handleDispatchedMessage(io, JSON.parse(sc.decode(msg.data)));
+  }
 });

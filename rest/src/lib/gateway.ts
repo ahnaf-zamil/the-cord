@@ -1,4 +1,5 @@
-import Redis from "ioredis";
+import { NatsConnection } from "nats";
+import { getNATSClient } from "./nats";
 
 export enum DispatchScopes {
   USER = 0,
@@ -16,13 +17,16 @@ class GatewayDispatcher {
     Uses Redis to dispatch events from REST interaction to gateway so users
     will be updated live. 
     */
-  redis: Redis;
+  nats: NatsConnection | null;
 
-  constructor(host: string = "localhost", port: number = 6379) {
-    this.redis = new Redis({ host, port });
+  constructor() {
+    // Initializing connection when server starts
+    getNATSClient().then((nc) => {
+      this.nats = nc;
+    });
   }
 
-  dispatch(content: object, scope: DispatchScopes, ev_type: EventTypes) {
+  async dispatch(content: object, scope: DispatchScopes, ev_type: EventTypes) {
     /*
         3 scopes of gateway dispatching
 
@@ -30,7 +34,8 @@ class GatewayDispatcher {
         'guild': This is to dispatch something to all members of a specific guild
         'channel': This is to dispatch something to all members of a specific channel 
     */
-    this.redis.publish(
+    this.nats = await getNATSClient();
+    this.nats.publish(
       "_",
       JSON.stringify({
         content,

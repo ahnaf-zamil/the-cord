@@ -6,6 +6,7 @@ import session from "express-session";
 import Redis from "ioredis";
 import { ValidationError } from "express-validation";
 import RedisStore from "connect-redis";
+import redisConf from "./config/redis.config";
 
 const PORT = process.env.port || 5000;
 
@@ -21,7 +22,7 @@ declare module "express-session" {
 }
 
 const redisStore = new RedisStore({
-  client: new Redis(),
+  client: new Redis(redisConf.PORT, redisConf.HOST),
   prefix: "REST_SESSION:",
 });
 
@@ -37,7 +38,7 @@ app.use(
   })
 );
 
-app.post("/send_message", (req, res) => {
+app.post("/send_message", async (req, res) => {
   const channelId = req.body.channel_id;
   const content = req.body.content;
 
@@ -65,7 +66,7 @@ app.use("/users", require("./routes/user.route").default);
 db.sequelize
   .authenticate()
   .then(() => {
-    app.listen(PORT, () => {
+    app.listen(PORT, async () => {
       db.sequelize.sync({ alter: true }).then(() => {
         console.log("Synchronised with database");
       });

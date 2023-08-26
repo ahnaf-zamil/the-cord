@@ -30,5 +30,6 @@ export const handleDispatchedMessage = (
   io: Server,
   msg: TDispatchedMessage
 ) => {
+  console.log(msg);
   scopeToHandlerMapping[msg.scope](io, msg);
 };
