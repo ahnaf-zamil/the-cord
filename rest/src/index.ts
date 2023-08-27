@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import express from "express";
 import cors from "cors";
 import { DispatchScopes, EventTypes, dispatcher } from "./lib/gateway";
@@ -63,16 +65,15 @@ app.use(function (err: Error, req: any, res: any, next: any) {
 app.use("/guilds", require("./routes/guild.route").default);
 app.use("/users", require("./routes/user.route").default);
 
-db.sequelize
-  .authenticate()
+db.dataSource
+  .initialize()
   .then(() => {
+    console.log("Connected to database");
     app.listen(PORT, async () => {
-      db.sequelize.sync({ alter: true }).then(() => {
-        console.log("Synchronised with database");
-      });
       console.log(`Server listening on port ${PORT}`);
     });
   })
-  .catch(() => {
+  .catch((err) => {
+    console.log(err);
     console.log("Couldn't connect to database");
   });

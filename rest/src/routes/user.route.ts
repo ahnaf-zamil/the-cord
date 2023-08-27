@@ -19,25 +19,25 @@ const RegisterValidation = {
 
 // Register account
 router.post("/register", validate(RegisterValidation), async (req, res) => {
-  const handle: string = req.body.handle;
-  const username: string = req.body.username.toLowerCase();
+  const handle: string = req.body.handle.toLowerCase();
+  const username: string = req.body.username;
   const email: string = req.body.email.toLowerCase();
   const password: string = req.body.password;
 
   // Checking for existing account
-  if ((await db.models.user.findOne({ where: { email } })) !== null) {
+  if ((await db.repos.user.findOne({ where: { email } })) !== null) {
     return res.status(409).json({ error: "User exists" });
   }
 
   const hashedPw = await bcrypt.hash(password, 10);
-  console.log(hashedPw);
-  await db.models.user.create({
+  const newUser = db.repos.user.create({
     id: snowflake.generate(),
     handle,
     username,
     email,
     password: hashedPw,
   });
+  await db.repos.user.save(newUser);
 
   res.json(201);
 });
@@ -55,7 +55,7 @@ router.post("/login", validate(LoginValidation), async (req, res) => {
   const password: string = req.body.password;
 
   // Checking for existing account
-  const existingUser: UserModel = await db.models.user.findOne({
+  const existingUser: UserModel = await db.repos.user.findOne({
     where: { email },
   });
   if (existingUser == null) {

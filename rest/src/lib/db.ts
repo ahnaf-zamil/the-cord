@@ -1,28 +1,28 @@
-import { ModelStatic, Sequelize, Model } from "sequelize";
-import guildModel from "../models/guild.model";
-
 import dbConf from "../config/db.config";
-import userModel from "../models/user.model";
+import { UserModel } from "../models/user.model";
+import { ChannelModel } from "../models/channel.model";
+import { DataSource, Repository } from "typeorm";
+import { GuildModel } from "../models/guild.model";
 
-interface IModels {
-  [x: string]: ModelStatic<any>;
+interface IRepositories {
+  [x: string]: Repository<any>;
 }
 
 interface IDB {
-  sequelize: Sequelize;
-  models: IModels;
+  dataSource: DataSource;
+  repos: IRepositories;
 }
 
 const db: IDB = {
-  sequelize: new Sequelize(dbConf.DB, dbConf.USER, dbConf.PASSWORD, {
-    host: dbConf.HOST,
-    dialect: "postgres",
-    pool: dbConf.pool,
+  dataSource: new DataSource({
+    ...dbConf,
+    entities: [UserModel, GuildModel, ChannelModel],
   }),
-  models: {},
+  repos: {},
 };
 
-db.models.guild = guildModel(db.sequelize);
-db.models.user = userModel(db.sequelize);
+db.repos.user = db.dataSource.getRepository(UserModel);
+db.repos.guild = db.dataSource.getRepository(GuildModel);
+db.repos.channel = db.dataSource.getRepository(ChannelModel);
 
 export default db;

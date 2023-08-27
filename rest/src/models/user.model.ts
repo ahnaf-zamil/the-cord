@@ -1,50 +1,28 @@
-import Sequelize, { Model, ModelStatic } from "sequelize";
+import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
 
-export class UserModel extends Model {
-  declare id: number;
-  declare handle: string;
-  declare username: string;
-  declare email: string;
-  declare password: string;
+@Entity({ name: "users" })
+export class UserModel extends BaseEntity {
+  @PrimaryColumn({ type: "bigint" })
+  id: number;
 
-  public override toJSON(): object {
+  @Column({ length: 30, nullable: false, unique: true })
+  handle: string;
+
+  @Column({ length: 30, nullable: false })
+  username: string;
+
+  @Column({ length: 300, nullable: false, unique: true })
+  email: string;
+
+  @Column({ type: "text", nullable: false })
+  password: string;
+
+  public toJSON(): object {
     return {
-      id: this.id,
+      id: this.id.toString(),
       handle: this.handle,
       username: this.username,
       email: this.email,
     };
   }
 }
-
-export default (sequelize: Sequelize.Sequelize): ModelStatic<UserModel> => {
-  UserModel.init(
-    {
-      id: {
-        type: Sequelize.BIGINT,
-        primaryKey: true,
-      },
-      handle: {
-        type: Sequelize.STRING(30),
-        allowNull: false,
-        unique: true,
-      },
-      username: {
-        type: Sequelize.STRING(50),
-        allowNull: false,
-      },
-
-      email: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      password: {
-        type: Sequelize.STRING(72), // Bcrypt hashes are at max 72 chars in length
-        allowNull: false,
-      },
-    },
-    { sequelize, modelName: "users" }
-  );
-  return UserModel;
-};
