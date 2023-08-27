@@ -14,7 +14,7 @@ export enum EventTypes {
 class GatewayDispatcher {
   /* Class for handling all gateway dispatching shenanigans.
 
-    Uses Redis to dispatch events from REST interaction to gateway so users
+    Uses NATS to dispatch events from REST interaction to gateway so users
     will be updated live. 
     */
   nats: NatsConnection | null;
