@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import { DispatchScopes, EventTypes, dispatcher } from "./lib/gateway";
 import db from "./lib/db";
@@ -16,6 +16,10 @@ const app = express();
 
 app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(500).send("Something broke L!");
+});
 
 declare module "express-session" {
   interface SessionData {

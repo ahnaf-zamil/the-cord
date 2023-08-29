@@ -5,6 +5,7 @@ import db from "../lib/db";
 import snowflake from "../lib/snowflake";
 import { GuildModel } from "../models/guild.model";
 import { ChannelTypes } from "../types/channelTypes";
+import { ChannelModel } from "../models/channel.model";
 
 const router = express.Router();
 
@@ -28,6 +29,7 @@ router.post(
       name,
       ownerId: req.user?.id,
     });
+    guild.members = [req.user!];
     await db.repos.guild.save(guild);
 
     // Creating first channel
@@ -35,14 +37,21 @@ router.post(
       id: snowflake.generate(),
       name: "general",
       type: ChannelTypes.TEXT,
-      guildId: guild.id,
+      guild: guild,
     });
     await db.repos.channel.save(generalChannel);
 
-    // WIP: Adding "owner" to guild
-
-    res.json(201);
+    res.status(201).json(guild.toJSON());
   }
 );
+
+// Fetch channels for guild
+router.get("/:guild_id/channels", async (req, res) => {
+  const guildId = req.params.guild_id;
+  const channels: Array<ChannelModel> = await db.repos.channel.find({
+    where: { guildId },
+  });
+  res.status(200).json(channels.map((c) => c.toJSON()));
+});
 
 export default router;
