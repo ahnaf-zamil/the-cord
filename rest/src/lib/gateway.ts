@@ -26,7 +26,7 @@ class GatewayDispatcher {
     });
   }
 
-  async dispatch(content: object, scope: DispatchScopes, ev_type: EventTypes) {
+  async dispatch(data: object, scope: DispatchScopes, ev_type: EventTypes) {
     /*
         3 scopes of gateway dispatching
 
@@ -38,7 +38,7 @@ class GatewayDispatcher {
     this.nats.publish(
       "_",
       JSON.stringify({
-        content,
+        data,
         scope,
         ev_type: EventTypes[ev_type],
       })
@@ -46,4 +46,4 @@ class GatewayDispatcher {
   }
 }
 
-export const dispatcher = new GatewayDispatcher();
+export const gatewayDispatcher = new GatewayDispatcher();

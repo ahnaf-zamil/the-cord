@@ -7,7 +7,7 @@ import { GuildModel } from "../models/guild.model";
 import { ChannelTypes } from "../types/channelTypes";
 import { ChannelModel } from "../models/channel.model";
 import { GuildMemberModel } from "../models/guild_member.model";
-import { isGuildOwner } from "../middleware/perms";
+import { isGuildMember, isGuildOwner } from "../middleware/perms";
 
 const router = express.Router();
 
@@ -54,13 +54,18 @@ router.post(
 );
 
 // Fetch channels for guild
-router.get("/:guild_id/channels", authRequired, async (req, res) => {
-  const guildId = req.params.guild_id;
-  const channels: Array<ChannelModel> = await db.repos.channel.find({
-    where: { guildId },
-  });
-  res.status(200).json(channels.map((c) => c.toJSON()));
-});
+router.get(
+  "/:guild_id/channels",
+  authRequired,
+  isGuildMember,
+  async (req, res) => {
+    const guildId = req.params.guild_id;
+    const channels: Array<ChannelModel> = await db.repos.channel.find({
+      where: { guildId },
+    });
+    res.status(200).json(channels.map((c) => c.toJSON()));
+  }
+);
 
 const CreateChannelValidation = {
   body: Joi.object({
@@ -75,7 +80,7 @@ router.post(
   isGuildOwner,
   validate(CreateChannelValidation),
   async (req, res) => {
-    const name: string = req.body.name;
+    const name: string = req.body.name.toLowerCase();
     const channel: ChannelModel = db.repos.channel.create({
       id: snowflake.generate(),
       name,

@@ -1,10 +1,9 @@
 import { Server } from "socket.io";
 
 interface TDispatchedMessage {
-  content: any;
+  data: any;
   scope: number;
   ev_type: string;
-  data: any;
 }
 
 const handleUserScope = (io: Server, msg: TDispatchedMessage) => {
@@ -17,7 +16,7 @@ const handleGuildScope = (io: Server, msg: TDispatchedMessage) => {
 
 const handleChannelScope = (io: Server, msg: TDispatchedMessage) => {
   /* Dispatches messages to channel scope */
-  io.to(`channel:${msg.content.channel_id}`).emit(msg.ev_type, msg.content);
+  io.to(`channel:${msg.data.channel_id}`).emit(msg.ev_type, msg.data);
 };
 
 const scopeToHandlerMapping: { [scope: number]: any } = {

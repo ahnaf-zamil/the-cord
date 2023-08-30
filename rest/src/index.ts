@@ -2,7 +2,6 @@ import "reflect-metadata";
 
 import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
-import { DispatchScopes, EventTypes, dispatcher } from "./lib/gateway";
 import db from "./lib/db";
 import session from "express-session";
 import Redis from "ioredis";
@@ -44,19 +43,6 @@ app.use(
   })
 );
 
-app.post("/send_message", async (req, res) => {
-  const channelId = req.body.channel_id;
-  const content = req.body.content;
-
-  dispatcher.dispatch(
-    { channel_id: channelId, content },
-    DispatchScopes.CHANNEL,
-    EventTypes.MESSAGE_CREATE
-  );
-  res.status(201);
-  res.send("");
-});
-
 app.use(function (err: Error, req: any, res: any, next: any) {
   if (err instanceof ValidationError) {
     return res.status(err.statusCode).json(err);
@@ -68,6 +54,7 @@ app.use(function (err: Error, req: any, res: any, next: any) {
 // Loading routes
 app.use("/guilds", require("./routes/guild.route").default);
 app.use("/users", require("./routes/user.route").default);
+app.use("/channels", require("./routes/channel.route").default);
 
 db.dataSource
   .initialize()
