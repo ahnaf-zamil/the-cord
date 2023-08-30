@@ -1,12 +1,4 @@
-import {
-  BaseEntity,
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  PrimaryColumn,
-} from "typeorm";
-import { GuildModel } from "./guild.model";
+import { BaseEntity, Column, Entity, PrimaryColumn } from "typeorm";
 
 @Entity({ name: "users" })
 export class UserModel extends BaseEntity {
@@ -24,10 +16,6 @@ export class UserModel extends BaseEntity {
 
   @Column({ type: "text", nullable: false })
   password: string;
-
-  @ManyToMany(() => GuildModel, (guild) => guild.members, { cascade: true })
-  @JoinTable({ name: "user_guild_join" })
-  guilds: GuildModel[];
 
   public toJSON(): object {
     return {

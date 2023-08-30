@@ -1,13 +1,5 @@
-import {
-  Entity,
-  BaseEntity,
-  PrimaryColumn,
-  Column,
-  OneToMany,
-  ManyToMany,
-} from "typeorm";
+import { Entity, BaseEntity, PrimaryColumn, Column, OneToMany } from "typeorm";
 import { ChannelModel } from "./channel.model";
-import { UserModel } from "./user.model";
 
 @Entity({ name: "guilds" })
 export class GuildModel extends BaseEntity {
@@ -22,9 +14,6 @@ export class GuildModel extends BaseEntity {
 
   @OneToMany(() => ChannelModel, (channel) => channel.guild)
   channels: ChannelModel[];
-
-  @ManyToMany(() => UserModel, (member) => member.guilds)
-  members: UserModel[];
 
   public toJSON(): object {
     return {
