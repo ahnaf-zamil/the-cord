@@ -11,4 +11,4 @@ My attempt at making a scalable distributed chat service like Discord.
 
 ## License
 
-Don't steal my code plase. If you do, at least credit it. The boring legal stuff is in the [LICENSE](./LICENSE) file;
+You are free to use my code, just make sure to credit it. The boring legal stuff is in the [LICENSE](./LICENSE) file;
