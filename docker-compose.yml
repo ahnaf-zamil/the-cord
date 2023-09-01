@@ -1,0 +1,33 @@
+# This compose file only has the external services
+# It is for development use only
+
+version: "3"
+
+services:
+  nats:
+    image: nats:alpine
+    container_name: "the_cord-nats"
+    restart: unless-stopped
+    ports:
+      - "6222:6222"
+      - "4222:4222"
+      - "8222:8222"
+
+  redis:
+    image: redis:alpine
+    container_name: "the_cord-redis"
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:15
+    container_name: "the_cord-postgres"
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - .docker/postgres:/var/lib/postgresql/data

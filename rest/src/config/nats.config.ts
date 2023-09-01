@@ -1,3 +1,3 @@
 export default {
-  SERVERS: ["localhost:4222"],
+  SERVERS: [process.env.NATS_HOST || "localhost:4222"],
 };
