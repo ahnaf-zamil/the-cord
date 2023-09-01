@@ -69,12 +69,12 @@ router.post("/login", validate(LoginValidation), async (req, res) => {
 
   // Setting session
   req.session.userId = existingUser.id.toString();
-  res.json(201);
+  res.json(200);
 });
 
 // Get logged in user
 router.get("/@me", authRequired, async (req, res) => {
-  res.status(201).json(req.user?.toJSON());
+  res.status(200).json(req.user?.toJSON());
 });
 
 export default router;

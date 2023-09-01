@@ -8,12 +8,22 @@ import Redis from "ioredis";
 import { ValidationError } from "express-validation";
 import RedisStore from "connect-redis";
 import redisConf from "./config/redis.config";
+import path from "path";
 
 const PORT = process.env.port || 5000;
+const isDev =
+  (process.env.NODE_ENV || "development") == "development" ? true : false;
 
 const app = express();
 
-app.use(cors({ origin: "*", credentials: true }));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      callback(null, origin);
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
@@ -27,7 +37,7 @@ declare module "express-session" {
 }
 
 const redisStore = new RedisStore({
-  client: new Redis(redisConf.PORT, redisConf.HOST),
+  client: new Redis(parseInt(redisConf.PORT.toString()), redisConf.HOST),
   prefix: "REST_SESSION:",
 });
 
@@ -39,6 +49,9 @@ app.use(
     secret: "testing",
     cookie: {
       maxAge: 604800000, // 7 days in ms
+      httpOnly: true,
+      sameSite: isDev ? "lax" : "none",
+      secure: !isDev,
     },
   })
 );
@@ -55,6 +68,15 @@ app.use(function (err: Error, req: any, res: any, next: any) {
 app.use("/guilds", require("./routes/guild.route").default);
 app.use("/users", require("./routes/user.route").default);
 app.use("/channels", require("./routes/channel.route").default);
+app.use("/gateway", require("./routes/gateway.route").default);
+
+// Output test.html file in dev environments
+if (isDev) {
+  app.use(express.static(path.join(__dirname, "public")));
+  app.get("/", function (req, res) {
+    res.sendFile(path.join(__dirname, "public/test.html"));
+  });
+}
 
 db.dataSource
   .initialize()

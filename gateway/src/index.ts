@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { handleDispatchedMessage } from "./dispatch_handler";
 import { connect, StringCodec } from "nats";
 import natsConfig from "./config/nats.config";
+import { loadEventHandlers } from "./events";
 
 const PORT = 3000;
 
@@ -14,14 +15,8 @@ const io = new Server(httpServer, {
   },
 });
 
-io.on("connection", (socket) => {
-  console.log("Socket has connected: " + socket.id);
-  socket.join("channel:12345");
-});
-
-io.on("disconnect", (socket) => {
-  console.log("Socket has disconnected: " + socket.id);
-});
+// Loading event handlers
+loadEventHandlers(io);
 
 httpServer.listen(PORT, async () => {
   console.log(`Listening on port ${PORT}`);
