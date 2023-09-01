@@ -13,6 +13,7 @@ import path from "path";
 const PORT = process.env.port || 5000;
 const isDev =
   (process.env.NODE_ENV || "development") == "development" ? true : false;
+console.log(isDev);
 
 const app = express();
 
@@ -50,8 +51,6 @@ app.use(
     cookie: {
       maxAge: 604800000, // 7 days in ms
       httpOnly: true,
-      sameSite: isDev ? "lax" : "none",
-      secure: !isDev,
     },
   })
 );

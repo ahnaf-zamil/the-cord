@@ -1,6 +1,7 @@
 import { DataSourceOptions } from "typeorm";
 
-const isDev = (process.env.NODE_ENV || "development") == "development" ? true : false;
+const isDev =
+  (process.env.NODE_ENV || "development") == "development" ? true : false;
 
 export default {
   type: "postgres",
