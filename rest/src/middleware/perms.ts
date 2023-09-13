@@ -11,7 +11,7 @@ export const isGuildOwner: RequestHandler = async (req, res, next) => {
     // Make sure the route parameter for guild ID for all routes using this middleware is named 'guild_id'
     where: { id: req.params.guild_id },
   });
-  if (guild.ownerId != req.user?.id) {
+  if (guild.owner_id != req.user?.id) {
     return res
       .status(403)
       .json({ error: "Missing permissions: You are not owner of this guild" });
@@ -23,11 +23,11 @@ export const isGuildOwner: RequestHandler = async (req, res, next) => {
 // **NOTE**: It requires the route parameter 'guild_id' OR 'channel_id'
 export const isGuildMember: RequestHandler = async (req, res, next) => {
   // Setting this as a local var since I don't want to rewrite logic
-  let guildId: string | number;
+  let guild_id: string | number;
 
   if ("guild_id" in req.params) {
     // Use guild ID to check perms
-    guildId = req.params.guild_id;
+    guild_id = req.params.guild_id;
   } else if ("channel_id" in req.params) {
     // If a channel ID is given, use that to query channel and fetch guild ID, then check for membership
     const channel: ChannelModel = await db.repos.channel.findOne({
@@ -37,13 +37,13 @@ export const isGuildMember: RequestHandler = async (req, res, next) => {
     if (channel == null) {
       return res.status(404).json({ error: "Channel not found" });
     }
-    guildId = channel.guildId;
+    guild_id = channel.guild_id;
   } else {
     throw Error("No route params called `guild_id` or `channel_id`");
   }
 
   const guildMember: GuildMemberModel = await db.repos.guildMember.findOne({
-    where: { guildId: guildId, userId: req.user?.id },
+    where: { guild_id: guild_id, user_id: req.user?.id },
   });
 
   // If guild member does not exist i.e user isn't a member of the guild, throw 403 forbidden

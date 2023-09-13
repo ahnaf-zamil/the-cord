@@ -68,7 +68,7 @@ router.post("/login", validate(LoginValidation), async (req, res) => {
   }
 
   // Setting session
-  req.session.userId = existingUser.id.toString();
+  req.session.user_id = existingUser.id.toString();
   res.json(200);
 });
 

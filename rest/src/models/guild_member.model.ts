@@ -5,9 +5,9 @@ export class GuildMemberModel extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "bigint", nullable: false })
-  guildId: number;
+  @Column({ type: "bigint", nullable: false, name: "guild_id" })
+  guild_id: number;
 
-  @Column({ type: "bigint", nullable: false })
-  userId: number;
+  @Column({ type: "bigint", nullable: false, name: "user_id" })
+  user_id: number;
 }

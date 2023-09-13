@@ -13,7 +13,6 @@ import path from "path";
 const PORT = process.env.port || 5000;
 const isDev =
   (process.env.NODE_ENV || "development") == "development" ? true : false;
-console.log(isDev);
 
 const app = express();
 
@@ -33,7 +32,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 declare module "express-session" {
   interface SessionData {
-    userId: string;
+    user_id: string;
   }
 }
 

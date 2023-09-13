@@ -10,7 +10,7 @@ export class GuildModel extends BaseEntity {
   name: string;
 
   @Column({ type: "bigint", nullable: false })
-  ownerId: number;
+  owner_id: number;
 
   @OneToMany(() => ChannelModel, (channel) => channel.guild)
   channels: ChannelModel[];
@@ -19,7 +19,7 @@ export class GuildModel extends BaseEntity {
     return {
       id: this.id.toString(),
       name: this.name,
-      owner_id: this.ownerId,
+      owner_id: this.owner_id,
     };
   }
 }

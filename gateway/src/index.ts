@@ -4,6 +4,7 @@ import { handleDispatchedMessage } from "./dispatch_handler";
 import { connect, StringCodec } from "nats";
 import natsConfig from "./config/nats.config";
 import { loadEventHandlers } from "./events";
+import { getDatabaseClient } from "./lib/db";
 
 const PORT = 3000;
 
@@ -21,6 +22,7 @@ loadEventHandlers(io);
 httpServer.listen(PORT, async () => {
   console.log(`Listening on port ${PORT}`);
 
+  const dbClient = await getDatabaseClient();
   // Creating NATS subscriber and listening for messages
   const nc = await connect({ servers: natsConfig.SERVERS });
   const sc = StringCodec();
@@ -30,4 +32,5 @@ httpServer.listen(PORT, async () => {
     // Passing message to dispatch handler
     handleDispatchedMessage(io, JSON.parse(sc.decode(msg.data)));
   }
+  await dbClient.end();
 });

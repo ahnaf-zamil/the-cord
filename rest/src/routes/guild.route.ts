@@ -29,14 +29,14 @@ router.post(
     const guild: GuildModel = db.repos.guild.create({
       id: snowflake.generate(),
       name,
-      ownerId: req.user?.id,
+      owner_id: req.user?.id,
     });
     await db.repos.guild.save(guild);
 
     // Adding owner as first member
     const newMember: GuildMemberModel = db.repos.guildMember.create({
-      guildId: guild.id,
-      userId: req.user?.id,
+      guild_id: guild.id,
+      user_id: req.user?.id,
     });
     await db.repos.guildMember.save(newMember);
 
@@ -45,7 +45,7 @@ router.post(
       id: snowflake.generate(),
       name: "general",
       type: ChannelTypes.TEXT,
-      guild: guild,
+      guild_id: guild.id,
     });
     await db.repos.channel.save(generalChannel);
 
@@ -59,9 +59,9 @@ router.get(
   authRequired,
   isGuildMember,
   async (req, res) => {
-    const guildId = req.params.guild_id;
+    const guild_id = req.params.guild_id;
     const channels: Array<ChannelModel> = await db.repos.channel.find({
-      where: { guildId },
+      where: { guild_id: guild_id },
     });
     res.status(200).json(channels.map((c) => c.toJSON()));
   }
@@ -85,7 +85,7 @@ router.post(
       id: snowflake.generate(),
       name,
       type: ChannelTypes.TEXT,
-      guildId: req.params.guild_id,
+      guild_id: req.params.guild_id,
     });
     await db.repos.channel.save(channel);
 

@@ -12,8 +12,8 @@ export class ChannelModel extends BaseEntity {
   @Column({ nullable: false })
   type: number;
 
-  @Column({ type: "bigint" })
-  guildId: number;
+  @Column({ type: "bigint", name: "guild_id" })
+  guild_id: number;
 
   @ManyToOne(() => GuildModel, (guild) => guild.channels)
   guild: GuildModel;
