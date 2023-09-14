@@ -51,6 +51,8 @@ export default (io: Server, callback: Function) => {
       socket.join(guild.id);
       socket.emit("GUILD_CREATE", guild);
     });
+
+    socket.emit("CLIENT_READY");
   });
 
   io.on("disconnect", (socket) => {
