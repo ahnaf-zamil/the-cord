@@ -40,7 +40,11 @@ export default (io: Server, callback: Function) => {
 
     // Sending client it's guilds and adding them to rooms
     const res = await dbClient.query(
-      `SELECT g.* FROM ${db_tables.GUILDS} g JOIN ${db_tables.GUILD_USER_JOIN} gj ON g.id = gj.guild_id WHERE gj.user_id=$1`,
+      `SELECT g.*, json_agg(json_build_object('id', c.id, 'name', c.name, 'type', c.type)) as channels 
+      FROM ${db_tables.GUILDS} g 
+      JOIN ${db_tables.CHANNELS} c ON c.guild_id=g.id 
+      JOIN ${db_tables.GUILD_USER_JOIN} gj ON g.id = gj.guild_id 
+      WHERE gj.user_id=$1 GROUP BY g.id`,
       [user_id]
     );
     res.rows.forEach((guild) => {
