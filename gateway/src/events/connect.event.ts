@@ -40,7 +40,7 @@ export default (io: Server, callback: Function) => {
 
     // Sending client it's guilds and adding them to rooms
     const res = await dbClient.query(
-      `SELECT g.*, json_agg(json_build_object('id', c.id, 'name', c.name, 'type', c.type)) as channels 
+      `SELECT g.*, json_agg(json_build_object('id', c.id::text, 'name', c.name, 'type', c.type)) as channels 
       FROM ${db_tables.GUILDS} g 
       JOIN ${db_tables.CHANNELS} c ON c.guild_id=g.id 
       JOIN ${db_tables.GUILD_USER_JOIN} gj ON g.id = gj.guild_id 
@@ -49,7 +49,11 @@ export default (io: Server, callback: Function) => {
     );
     res.rows.forEach((guild) => {
       socket.join(guild.id);
-      socket.emit("GUILD_CREATE", guild);
+      socket.emit("GUILD_CREATE", {
+        ...guild,
+        id: guild.id.toString(),
+        owner_id: guild.owner_id.toString(),
+      });
     });
 
     socket.emit("CLIENT_READY");

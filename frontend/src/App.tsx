@@ -1,70 +1,72 @@
-import { io } from "socket.io-client";
+import { useEffect, useState } from "react";
+import { LoginForm } from "./LoginForm";
+import { useAuthStore } from "./lib/state";
+import { httpClient } from "./lib/http";
+import { AxiosError } from "axios";
+import { MainView } from "./views/MainView";
 
-const events = ["GUILD_CREATE", "CLIENT_READY"];
+const fetchCurrentUser = async () => {
+  try {
+    const resp = await httpClient.get("users/@me");
+    return resp.data;
+  } catch (e) {
+    const err = e as AxiosError;
+    if (err.response) {
+      console.log(err.status);
+    }
+    console.log(err.config);
+    return null;
+  }
+};
+
+const loginUser = async (email: string, password: string) => {
+  try {
+    const resp = await httpClient.post("users/login", {
+      email,
+      password,
+    });
+    return resp.data;
+  } catch (e) {
+    const err = e as AxiosError;
+    if (err.response) {
+      console.log(err.status);
+    }
+    console.log(err.config);
+    return null;
+  }
+};
 
 export const App = () => {
-  const login = async () => {
-    const resp = await fetch("http://localhost:5000/users/login", {
-      method: "POST",
-      body: JSON.stringify({
-        email: "ahnaf@ahnafzamil.com",
-        password: "amogus123",
-      }),
-      credentials: "include",
-      headers: {
-        "content-type": "application/json",
-      },
-    });
+  const authStore = useAuthStore();
 
-    if (resp.status === 200) {
-      console.log("Logged in successfully");
-      return;
-    } else {
-      throw Error("Login error");
-    }
-  };
-
-  const fetchAuthToken = async () => {
-    const resp = await fetch("http://localhost:5000/gateway/auth", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "content-type": "application/json",
-      },
-    });
-
-    if (resp.status === 200) {
-      console.log("Fetched auth token");
-      return await resp.json();
-    } else {
-      throw Error("Auth token fetch error");
-    }
-  };
-
-  const startConnection = async () => {
-    await login();
-    const authToken = await fetchAuthToken();
-    if (authToken) {
-      const socket = io("http://localhost:3000", {
-        auth: authToken!,
-      });
-
-      socket.on("connect", () => {
-        console.log("Connected to gateway");
-      });
-
-      events.forEach((ev) =>
-        socket.on(ev, (data) => {
-          console.log(ev, data || "no data");
-        })
-      );
-    }
-  };
+  useEffect(() => {
+    (async () => {
+      const user = await fetchCurrentUser();
+      if (user) {
+        authStore.setUser(user);
+      }
+    })();
+  }, []);
 
   return (
-    <>
-      <button onClick={startConnection}>Start connection</button>
-      <p>Keep dev tools console open</p>
-    </>
+    <main className="flex h-screen">
+      {!authStore.user ? (
+        <>
+          <LoginForm
+            callback={async (e) => {
+              const target = e.target as typeof e.target & {
+                email: { value: string };
+                password: { value: string };
+              };
+              await loginUser(target.email.value, target.password.value);
+              window.location.reload();
+            }}
+          />
+          <p>Keep dev tools console open</p>
+        </>
+      ) : (
+        <MainView />
+      )}
+    </main>
   );
 };
